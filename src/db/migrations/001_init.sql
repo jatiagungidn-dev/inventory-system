@@ -1,19 +1,26 @@
 CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 
-CREATE TYPE inventory_status AS ENUM (
-  'AVAILABLE',
-  'RESTRICTED',
-  'QUARANTINED',
-  'SCRAPPED'
-);
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'inventory_status') THEN
+    CREATE TYPE inventory_status AS ENUM (
+      'AVAILABLE',
+      'RESTRICTED',
+      'QUARANTINED',
+      'SCRAPPED'
+    );
+  END IF;
 
-CREATE TYPE transaction_type_enum AS ENUM (
-  'INBOUND',
-  'RESERVATION',
-  'FULFILLMENT',
-  'ADJUSTMENT',
-  'RELOCATION'
-);
+  IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'transaction_type_enum') THEN
+    CREATE TYPE transaction_type_enum AS ENUM (
+      'INBOUND',
+      'RESERVATION',
+      'FULFILLMENT',
+      'ADJUSTMENT',
+      'RELOCATION'
+    );
+  END IF;
+END $$;
 
 CREATE TABLE IF NOT EXISTS products (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),

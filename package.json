@@ -1,9 +1,13 @@
 {
   "name": "inventory-management",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "Inventory Management System API",
+  "main": "dist/index.js",
   "scripts": {
+    "dev": "tsx watch src/main.ts",
+    "build": "tsc",
+    "start": "node dist/main.js",
+    "migrate": "tsx src/db/run-migration.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -12,9 +16,7 @@
   "type": "module",
   "dependencies": {
     "dotenv": "^17.4.2",
-    "drizzle-orm": "^0.45.2",
     "express": "^5.2.1",
-    "fastify": "^5.11.3",
     "pg": "^8.23.0",
     "zod": "^4.4.3"
   },
@@ -22,7 +24,7 @@
     "@types/express": "^5.0.6",
     "@types/node": "^26.2.0",
     "@types/pg": "^8.21.0",
-    "drizzle-kit": "^0.31.10",
+    "prettier-plugin-sql": "^0.20.0",
     "tsx": "^4.23.12",
     "typescript": "^7.0.2"
   },
