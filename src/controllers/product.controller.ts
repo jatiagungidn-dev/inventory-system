@@ -1,7 +1,10 @@
 import type { Request, Response } from "express";
 import {
   findAllProducts,
+  getProductById,
   addProduct,
+  updateProductById,
+  deleteProductById,
 } from "../repositories/product.repository.js";
 
 export async function getProduct(_req: Request, res: Response) {
@@ -16,6 +19,13 @@ export async function getProduct(_req: Request, res: Response) {
 
     res.status(500).json({ status: "ERROR", message: "Internal Server Error" });
   }
+}
+
+export async function getById(req: Request<{ id: string }>, res: Response) {
+  const { id } = req.params;
+  const product = await getProductById(id);
+
+  res.status(200).json({ status: "OK", data: product });
 }
 
 export async function postProduct(req: Request, res: Response) {
@@ -47,4 +57,22 @@ export async function postProduct(req: Request, res: Response) {
 
     res.status(500).json({ status: "ERROR", message: "Internal Server Error" });
   }
+}
+
+export async function putProduct(req: Request<{ id: string }>, res: Response) {
+  const { id } = req.params;
+  const { name, sku, description } = req.body;
+  const updated = await updateProductById(name, sku, description, id);
+
+  res.status(200).json({ status: "OK", data: updated });
+}
+
+export async function deleteProduct(
+  req: Request<{ id: string }>,
+  res: Response,
+) {
+  const { id } = req.params;
+  const deleted = await deleteProductById(id);
+
+  res.status(200).json({ status: "OK", data: deleted });
 }
