@@ -7,6 +7,7 @@ import {
   patchProductById,
   deleteProductById,
 } from "../repositories/product.repository.js";
+import { createProductSchema } from "../schemas/product.schemas.js";
 
 export async function getProduct(_req: Request, res: Response) {
   try {
@@ -53,13 +54,6 @@ export async function getById(req: Request<{ id: string }>, res: Response) {
 export async function postProduct(req: Request, res: Response) {
   try {
     const { sku, name, description } = req.body;
-
-    if (!sku || !name) {
-      res
-        .status(400)
-        .json({ status: "fail", message: "'sku' and 'name' are required" });
-      return;
-    }
 
     const product = await addProduct(sku, name, description);
 

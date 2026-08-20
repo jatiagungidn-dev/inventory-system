@@ -1,7 +1,7 @@
 import { Pool } from "pg";
 import { env } from "../config/env.js";
 
-const isProduction = env.NODE_ENV === "PRODUCTION";
+const isProduction = env.NODE_ENV === "production";
 
 export const pool = new Pool({
   connectionString: env.DATABASE_URL,

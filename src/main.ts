@@ -12,12 +12,12 @@ app.use("/api/products", productRouter);
 app.get("/health", async (_req: Request, res: Response) => {
   try {
     await pool.query("SELECT 1");
-    res.status(200).json({ status: "OK", database: "CONNECTED" });
+    res.status(200).json({ status: "success", database: "Connected" });
   } catch (err) {
-    console.error("Healtcheck Failed:", err);
+    console.error("Healthcheck Failed:", err);
     res.status(500).json({
-      status: "ERROR",
-      database: "DISCONNECTED",
+      status: "error",
+      database: "Disconnected",
       message: "Internal Server Error",
     });
   }
