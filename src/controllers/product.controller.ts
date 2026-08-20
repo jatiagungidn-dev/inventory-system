@@ -1,4 +1,4 @@
-import type { Request, Response } from "express";
+import type { Request, Response, NextFunction } from "express";
 import {
   findAllProducts,
   getProductById,
@@ -7,9 +7,13 @@ import {
   patchProductById,
   deleteProductById,
 } from "../repositories/product.repository.js";
-import { createProductSchema } from "../schemas/product.schemas.js";
+import { AppError } from "../utils/app-errors.js";
 
-export async function getProduct(_req: Request, res: Response) {
+export async function getProduct(
+  _req: Request,
+  res: Response,
+  next: NextFunction,
+) {
   try {
     const products = await findAllProducts();
 
@@ -17,24 +21,22 @@ export async function getProduct(_req: Request, res: Response) {
       .status(200)
       .json({ status: "success", count: products.length, data: products });
   } catch (err) {
-    console.error("[products] Failed to fetch products:", err);
-
-    res.status(500).json({ status: "error", message: "Internal Server Error" });
+    next(err);
   }
 }
 
-export async function getById(req: Request<{ id: string }>, res: Response) {
+export async function getById(
+  req: Request<{ id: string }>,
+  res: Response,
+  next: NextFunction,
+) {
   try {
     const { id } = req.params;
 
     const product = await getProductById(id);
 
     if (!product) {
-      res.status(404).json({
-        status: "fail",
-        message: "Product not found",
-      });
-      return;
+      return next(new AppError("Product not found with that ID", 404));
     }
 
     res.status(200).json({
@@ -42,16 +44,15 @@ export async function getById(req: Request<{ id: string }>, res: Response) {
       data: product,
     });
   } catch (err) {
-    console.error("[products] Error while fetching product:", err);
-
-    res.status(500).json({
-      status: "error",
-      message: "Internal Server Error",
-    });
+    next(err);
   }
 }
 
-export async function postProduct(req: Request, res: Response) {
+export async function postProduct(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) {
   try {
     const { sku, name, description } = req.body;
 
@@ -59,41 +60,23 @@ export async function postProduct(req: Request, res: Response) {
 
     res.status(201).json({ status: "success", data: product });
   } catch (err) {
-    console.error("[products] Failed to add product:", err);
-
-    if ((err as any)?.code === "23505") {
-      res.status(409).json({
-        status: "fail",
-        message: "Product with that SKU already exists",
-      });
-      return;
-    }
-
-    res.status(500).json({ status: "error", message: "Internal Server Error" });
+    next(err);
   }
 }
 
-export async function putProduct(req: Request<{ id: string }>, res: Response) {
+export async function putProduct(
+  req: Request<{ id: string }>,
+  res: Response,
+  next: NextFunction,
+) {
   try {
     const { id } = req.params;
     const { sku, name, description } = req.body;
 
-    if (!sku || !name || !description) {
-      res.status(400).json({
-        status: "fail",
-        message: "'sku', 'name', and 'description' are required",
-      });
-      return;
-    }
-
     const updated = await updateProductById(id, sku, name, description);
 
     if (!updated) {
-      res.status(404).json({
-        status: "fail",
-        message: "Product not found",
-      });
-      return;
+      return next(new AppError("Product not found", 404));
     }
 
     res.status(200).json({
@@ -101,39 +84,23 @@ export async function putProduct(req: Request<{ id: string }>, res: Response) {
       data: updated,
     });
   } catch (err) {
-    console.error("[products] Error while updating product:", err);
-
-    res.status(500).json({
-      status: "error",
-      message: "Internal Server Error",
-    });
+    next(err);
   }
 }
 
 export async function patchProduct(
   req: Request<{ id: string }>,
   res: Response,
+  next: NextFunction,
 ) {
   try {
     const { id } = req.params;
     const { sku, name, description } = req.body;
 
-    if (sku === undefined && name === undefined && description === undefined) {
-      res.status(400).json({
-        status: "fail",
-        message: "At least one field is required to update",
-      });
-      return;
-    }
-
     const patched = await patchProductById(id, sku, name, description);
 
     if (!patched) {
-      res.status(404).json({
-        status: "fail",
-        message: "Product not found",
-      });
-      return;
+      return next(new AppError("Product not found", 404));
     }
 
     res.status(200).json({
@@ -141,31 +108,20 @@ export async function patchProduct(
       data: patched,
     });
   } catch (err) {
-    console.error("[products] Error while patching product:", err);
-
-    res.status(500).json({
-      status: "error",
-      message: "Internal Server Error",
-    });
+    next(err);
   }
 }
 
 export async function deleteProduct(
   req: Request<{ id: string }>,
   res: Response,
+  next: NextFunction,
 ) {
   try {
     const { id } = req.params;
 
-    await deleteProductById(id);
-
     res.status(204).send();
   } catch (err) {
-    console.error("[products] Error while deleting product:", err);
-
-    res.status(500).json({
-      status: "error",
-      message: "Internal Server Error",
-    });
+    next(err);
   }
 }

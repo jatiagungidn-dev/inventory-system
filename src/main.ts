@@ -1,7 +1,9 @@
-import express, { Express, Request, Response } from "express";
+import express, { Express, NextFunction, Request, Response } from "express";
 import { env } from "./config/env.js";
 import { pool } from "./db/index.js";
 import productRouter from "./routes/product.routers.js";
+import { errorHandler } from "./middleware/error.middleware.js";
+import { AppError } from "./utils/app-errors.js";
 
 export const app: Express = express();
 
@@ -22,6 +24,12 @@ app.get("/health", async (_req: Request, res: Response) => {
     });
   }
 });
+
+app.use((req: Request, _res: Response, next: NextFunction) => {
+  next(new AppError(`Cannot find ${req.originalUrl} on this server`, 404));
+});
+
+app.use(errorHandler);
 
 const server = app.listen(env.PORT, () => {
   console.log(
